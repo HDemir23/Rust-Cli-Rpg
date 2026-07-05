@@ -1,11 +1,9 @@
+use crate::structs::{Enemy, EnemyArchetype, EnemyRarity, Player};
 use rand::RngExt;
 use rand::seq::IndexedRandom;
-use crate::structs::{Enemy, EnemyRarity, Player, EnemyArchetype};
 
-
-
-
-    pub fn gen_enemy(player: &Player) -> Enemy {
+/// Creates an enemy scaled around the current player level.
+pub fn gen_enemy(player: &Player) -> Enemy {
     let mut rng = rand::rng();
 
     let archetypes = [
@@ -58,48 +56,45 @@ use crate::structs::{Enemy, EnemyRarity, Player, EnemyArchetype};
         health,
         damage,
         gold_reward,
-        rarity
+        rarity,
     }
 }
 
+/// Picks an enemy level close to the player's current level.
+fn gen_enemy_level(player_level: u32) -> u32 {
+    let mut rng = rand::rng();
 
+    let min_level = if player_level > 2 {
+        player_level - 2
+    } else {
+        1
+    };
 
-    fn gen_enemy_level (player_level: u32) -> u32 {
-        let mut rng = rand::rng();
+    let max_level = player_level + 2;
 
-        let min_level =
-            if player_level > 2 {
-            player_level - 2
-        } else { 1 };
+    rng.random_range(min_level..=max_level)
+}
 
-        let max_level = player_level + 2;
+/// Rolls the rarity tier for a newly generated enemy.
+fn gen_rarity() -> EnemyRarity {
+    let mut rng = rand::rng();
+    let roll = rng.random_range(1..=100);
 
-        rng.random_range(min_level..=max_level)
+    match roll {
+        1..=70 => crate::structs::EnemyRarity::Common,
+        71..=90 => crate::structs::EnemyRarity::Rare,
+        91..=98 => crate::structs::EnemyRarity::Elite,
+        _ => crate::structs::EnemyRarity::Boss,
     }
+}
 
-    fn gen_rarity() -> EnemyRarity {
-        let mut rng = rand::rng();
-        let roll = rng.random_range(1..=100);
-
-        match roll {
-            1..=70 => crate::structs::EnemyRarity::Common,
-            71..=90 => crate::structs::EnemyRarity::Rare,
-            91..=98 => crate::structs::EnemyRarity::Elite,
-            _ => crate::structs::EnemyRarity::Boss,
-        }
-    }
-
-    fn rarity_bonus(
-        rarity: &EnemyRarity,
-        health: &mut i32,
-        damage: &mut i32,
-        gold_reward: &mut u32,
-    ) {
+/// Applies stat and reward scaling based on rarity.
+fn rarity_bonus(rarity: &EnemyRarity, health: &mut i32, damage: &mut i32, gold_reward: &mut u32) {
     match rarity {
         crate::structs::EnemyRarity::Common => {}
         crate::structs::EnemyRarity::Rare => {
             *health = (*health as f32 * 1.25) as i32;
-            *damage = (*damage as f32 * 1.25) as i32; 
+            *damage = (*damage as f32 * 1.25) as i32;
             *gold_reward = (*gold_reward as f32 * 1.50) as u32;
         }
         crate::structs::EnemyRarity::Elite => {
@@ -115,77 +110,44 @@ use crate::structs::{Enemy, EnemyRarity, Player, EnemyArchetype};
     }
 }
 
+/// Picks a text modifier that also affects enemy stats.
+fn gen_modifiers() -> &'static str {
+    let mut rng = rand::rng();
 
-    fn gen_modifiers() -> &'static str {
-        let mut rng = rand::rng();
+    let modifiers = [
+        "Angry", "Wild", "Cursed", "Ancient", "Hungry", "Dark", "Broken",
+    ];
 
-        let modifiers = [
-            "Angry",
-            "Wild",
-            "Cursed",
-            "Ancient",
-            "Hungry",
-            "Dark",
-            "Broken",
-        ];
+    modifiers.choose(&mut rng).expect("modifiers is empty")
+}
 
-        modifiers
-            .choose(&mut rng)
-            .expect("modifiers is empty")
-
-
-    }
-
-    fn apply_modifiers(
-        modifier: &str,
-        health: &mut i32,
-        damage: &mut i32,
-        gold_reward: &mut u32,
-    ) {
-        match modifier {
-            "Angry" => *damage += 5,
-            "Wild" => {
-                *health += 10;
-                *damage += 2;
-            },
-            "Cursed" => {
-                *damage += 8;
-                *health -= 5;
-            },
-            "Ancient" => {
-                *health += 25;
-                *gold_reward += 10;
-            },
-            "Hungry" => {
-                *damage += 3;
-            },
-            "Dark" => {
-                *health += 15;
-                *damage += 4;
-            },
-            "Broken" => {
-                *health -= 10;
-                *gold_reward += 5;
-            },
-            _ => {}
+/// Applies stat and reward changes for the selected modifier.
+fn apply_modifiers(modifier: &str, health: &mut i32, damage: &mut i32, gold_reward: &mut u32) {
+    match modifier {
+        "Angry" => *damage += 5,
+        "Wild" => {
+            *health += 10;
+            *damage += 2;
         }
-    }
-
-
-    pub fn check_level_up (player: &mut Player) {
-        while player.xp >= player.xp_to_next_level {
-            player.xp -= player.xp_to_next_level;
-            player.level += 1;
-
-            player.max_health += 20;
-            player.health = player.max_health;
-            player.damage += 5;
-            player.xp_to_next_level += player.level * 50;
-
-            println!("LEVEL UP!");
-            println!("You are now level {}", player.level);
-            println!("Max health increased to {}", player.max_health);
-            println!("Damage increased to {}", player.damage);
-
+        "Cursed" => {
+            *damage += 8;
+            *health -= 5;
         }
+        "Ancient" => {
+            *health += 25;
+            *gold_reward += 10;
+        }
+        "Hungry" => {
+            *damage += 3;
+        }
+        "Dark" => {
+            *health += 15;
+            *damage += 4;
+        }
+        "Broken" => {
+            *health -= 10;
+            *gold_reward += 5;
+        }
+        _ => {}
     }
+}

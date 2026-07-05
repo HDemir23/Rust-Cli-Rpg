@@ -1,7 +1,6 @@
+use ::std::io::stdin;
 
-
-use::std::io::stdin;
-
+/// Prints a prompt and returns the trimmed user input.
 pub fn read_input(message: &str) -> String {
     println!("{}", message);
 
