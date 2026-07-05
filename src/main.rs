@@ -3,6 +3,7 @@ pub mod enemy_gen;
 pub mod player_progression;
 mod read_input;
 pub mod structs;
+pub mod dungeon;
 
 use crate::enemy_gen::gen_enemy;
 use battle::battle;
