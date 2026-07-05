@@ -5,7 +5,7 @@ use crate::structs::{Enemy, EnemyRarity, Player, EnemyArchetype};
 
 
 
-pub fn gen_enemy(player: &Player) -> Enemy {
+    pub fn gen_enemy(player: &Player) -> Enemy {
     let mut rng = rand::rng();
 
     let archetypes = [
@@ -99,17 +99,17 @@ pub fn gen_enemy(player: &Player) -> Enemy {
         crate::structs::EnemyRarity::Common => {}
         crate::structs::EnemyRarity::Rare => {
             *health = (*health as f32 * 1.25) as i32;
-            *damage = (*damage as f32 * 1.25) as i32; //fix later
+            *damage = (*damage as f32 * 1.25) as i32; 
             *gold_reward = (*gold_reward as f32 * 1.50) as u32;
         }
         crate::structs::EnemyRarity::Elite => {
             *health = (*health as f32 * 1.75) as i32;
-            *damage = (*damage as f32 * 1.50) as i32; //fix later
+            *damage = (*damage as f32 * 1.50) as i32;
             *gold_reward = (*gold_reward as f32 * 2.50) as u32;
         }
         crate::structs::EnemyRarity::Boss => {
             *health = (*health as f32 * 2.50) as i32;
-            *health = (*health as f32 * 2.00) as i32; //fix later
+            *damage = (*damage as f32 * 2.00) as i32;
             *gold_reward = (*gold_reward as f32 * 4.00) as u32;
         }
     }
@@ -143,7 +143,7 @@ pub fn gen_enemy(player: &Player) -> Enemy {
         gold_reward: &mut u32,
     ) {
         match modifier {
-            "angry" => *damage += 5,
+            "Angry" => *damage += 5,
             "Wild" => {
                 *health += 10;
                 *damage += 2;
@@ -171,3 +171,21 @@ pub fn gen_enemy(player: &Player) -> Enemy {
         }
     }
 
+
+    pub fn check_level_up (player: &mut Player) {
+        while player.xp >= player.xp_to_next_level {
+            player.xp -= player.xp_to_next_level;
+            player.level += 1;
+
+            player.max_health += 20;
+            player.health = player.max_health;
+            player.damage += 5;
+            player.xp_to_next_level += player.level * 50;
+
+            println!("LEVEL UP!");
+            println!("You are now level {}", player.level);
+            println!("Max health increased to {}", player.max_health);
+            println!("Damage increased to {}", player.damage);
+
+        }
+    }

@@ -13,9 +13,12 @@ fn main() {
     let mut player = Player {
         name: read_input("Enter Ur name"),
         health: 100,
+        max_health: 100,
         damage: 20,
         gold: 0,
         level: 1,
+        xp:0,
+        xp_to_next_level: 10,
     };
 
     loop {
@@ -32,6 +35,8 @@ fn main() {
 
         if player.health <= 0 {
             println!("Game Over");
+            println!("Gained Gold: {}", player.gold);
+            println!("Gained Xp: {}", player.xp);
             break;
         }
 

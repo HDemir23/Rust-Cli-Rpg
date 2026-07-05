@@ -3,9 +3,12 @@
 pub struct Player {
     pub name: String,
     pub health: i32,
+    pub max_health: i32,
     pub damage: i32,
     pub gold: u32,
     pub level: u32,
+    pub xp :u32,
+    pub xp_to_next_level: u32,
 }
 #[derive(Debug)]
 pub enum EnemyRarity {

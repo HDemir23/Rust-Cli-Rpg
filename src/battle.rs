@@ -1,5 +1,6 @@
 use crate::read_input::read_input;
 use crate::structs::{Enemy, Player};
+use crate::enemy_gen::check_level_up;
 
 pub fn battle (player: &mut Player, enemy: &mut Enemy) {
 
@@ -19,8 +20,13 @@ pub fn battle (player: &mut Player, enemy: &mut Enemy) {
                 println!("You attacked {} for {} damage", enemy.name, player.damage);
             },
             "e" => {
-                player.health += 15;
-                println!("Healed 15 health: {}", player.health);
+                if player.health > player.max_health{
+                    player.health = player.max_health;
+                } else {
+                    player.health += 25;
+                }
+                
+                println!("Healed 25 health: {}", player.health);
             },
             "r" => {
                 println!("you run away");
@@ -33,17 +39,15 @@ pub fn battle (player: &mut Player, enemy: &mut Enemy) {
         // if enemy health <= 0 gain gold and move to the next enemy
         if enemy.health <= 0 {
             player.gold += enemy.gold_reward;
-            player.health += 20;
-            player.level += 1;
 
+            let xp_gain = enemy.level * 20;
+            player.xp += xp_gain;
 
             println!("You defeated {}", enemy.name);
             println!("Gold gained: {}", enemy.gold_reward);
-            println!("Total gold: {}", player.gold);
-            println!("20 health restored");
-            println!("Health: {}", player.health);
-            println!("Level up! Current level: {}", player.level);
+            println!("XP gained: {}", xp_gain);
 
+            check_level_up(player);
             break
         }
 
