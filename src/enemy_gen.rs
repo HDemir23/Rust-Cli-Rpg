@@ -1,6 +1,6 @@
 use crate::structs::{Enemy, EnemyArchetype, EnemyRarity, Player};
-use rand::RngExt;
 use rand::seq::IndexedRandom;
+use rand::RngExt;
 
 /// Creates an enemy scaled around the current player level.
 pub fn gen_enemy(player: &Player) -> Enemy {
@@ -12,24 +12,28 @@ pub fn gen_enemy(player: &Player) -> Enemy {
             base_health: 35,
             base_damage: 10,
             base_gold: 8,
+            base_xp: 15,
         },
         EnemyArchetype {
             name: "Skeleton",
             base_health: 45,
             base_damage: 10,
             base_gold: 12,
+            base_xp: 18,
         },
         EnemyArchetype {
             name: "Orc",
             base_health: 70,
             base_damage: 15,
             base_gold: 20,
+            base_xp: 25,
         },
         EnemyArchetype {
             name: "Wolf",
             base_health: 40,
             base_damage: 13,
             base_gold: 10,
+            base_xp: 17,
         },
     ];
 
@@ -45,10 +49,11 @@ pub fn gen_enemy(player: &Player) -> Enemy {
 
     let mut health = selected.base_health + level_multipilier * rng.random_range(5..=12);
     let mut damage = selected.base_damage + level_multipilier * rng.random_range(1..=4);
-    let mut gold_reward = selected.base_gold + enemy_level * rng.random_range(2..=6);
+    let mut gold_reward = selected.base_gold + enemy_level * rng.random_range(3..=8);
+    let mut xp_reward: u32 = selected.base_xp + enemy_level * rng.random_range(9..=14);
 
-    rarity_bonus(&rarity, &mut health, &mut damage, &mut gold_reward);
-    apply_modifiers(&modifier, &mut health, &mut damage, &mut gold_reward);
+    rarity_bonus(&rarity, &mut health, &mut damage, &mut gold_reward, &mut xp_reward);
+    apply_modifiers(&modifier, &mut health, &mut damage, &mut gold_reward, &mut xp_reward);
 
     Enemy {
         name: format!("{} {}", modifier, selected.name),
@@ -57,6 +62,7 @@ pub fn gen_enemy(player: &Player) -> Enemy {
         damage,
         gold_reward,
         rarity,
+        xp_reward,
     }
 }
 
@@ -89,23 +95,26 @@ fn gen_rarity() -> EnemyRarity {
 }
 
 /// Applies stat and reward scaling based on rarity.
-fn rarity_bonus(rarity: &EnemyRarity, health: &mut i32, damage: &mut i32, gold_reward: &mut u32) {
+fn rarity_bonus(rarity: &EnemyRarity, health: &mut i32, damage: &mut i32, gold_reward: &mut u32, xp_reward: &mut u32) {
     match rarity {
         crate::structs::EnemyRarity::Common => {}
         crate::structs::EnemyRarity::Rare => {
             *health = (*health as f32 * 1.25) as i32;
             *damage = (*damage as f32 * 1.25) as i32;
             *gold_reward = (*gold_reward as f32 * 1.50) as u32;
+            *xp_reward = (*xp_reward as f32 * 1.35) as u32;
         }
         crate::structs::EnemyRarity::Elite => {
             *health = (*health as f32 * 1.75) as i32;
             *damage = (*damage as f32 * 1.50) as i32;
             *gold_reward = (*gold_reward as f32 * 2.50) as u32;
+            *xp_reward = (*xp_reward as f32 * 2.00) as u32;
         }
         crate::structs::EnemyRarity::Boss => {
             *health = (*health as f32 * 2.50) as i32;
             *damage = (*damage as f32 * 2.00) as i32;
             *gold_reward = (*gold_reward as f32 * 4.00) as u32;
+            *xp_reward = (*xp_reward as f32 * 3.50) as u32;
         }
     }
 }
@@ -122,32 +131,50 @@ fn gen_modifiers() -> &'static str {
 }
 
 /// Applies stat and reward changes for the selected modifier.
-fn apply_modifiers(modifier: &str, health: &mut i32, damage: &mut i32, gold_reward: &mut u32) {
+fn apply_modifiers(modifier: &str, health: &mut i32, damage: &mut i32, gold_reward: &mut u32, xp_reward: &mut u32) {
     match modifier {
-        "Angry" => *damage += 5,
+        "Angry" => {
+            *damage += 5;
+            *xp_reward += 5;
+        }
+
         "Wild" => {
             *health += 10;
             *damage += 2;
+            *xp_reward += 4;
         }
+
         "Cursed" => {
             *damage += 8;
             *health -= 5;
+            *xp_reward += 8;
+            *gold_reward += 3;
         }
+
         "Ancient" => {
             *health += 25;
             *gold_reward += 10;
+            *xp_reward += 10;
         }
+
         "Hungry" => {
             *damage += 3;
+            *xp_reward += 3;
         }
+
         "Dark" => {
             *health += 15;
             *damage += 4;
+            *xp_reward += 7;
+            *gold_reward += 5;
         }
+
         "Broken" => {
             *health -= 10;
             *gold_reward += 5;
+            *xp_reward += 2;
         }
+
         _ => {}
     }
 }

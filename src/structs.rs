@@ -28,6 +28,7 @@ pub struct Enemy {
     pub health: i32,
     pub damage: i32,
     pub gold_reward: u32,
+    pub xp_reward: u32,
     pub rarity: EnemyRarity,
 }
 
@@ -37,4 +38,11 @@ pub struct EnemyArchetype {
     pub base_health: i32,
     pub base_damage: i32,
     pub base_gold: u32,
+    pub base_xp: u32,
+}
+
+pub enum TurnReslut {
+    Continue,
+    SkipEnemyTurn,
+    EndBattle,
 }

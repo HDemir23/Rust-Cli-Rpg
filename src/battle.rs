@@ -1,6 +1,6 @@
 use crate::player_progression::{check_level_up, player_health_increase};
 use crate::read_input::read_input;
-use crate::structs::{Enemy, Player};
+use crate::structs::{Enemy, Player, TurnReslut};
 
 /// Runs one battle encounter between the player and the active enemy.
 pub fn battle(player: &mut Player, enemy: &mut Enemy) {
@@ -10,11 +10,12 @@ pub fn battle(player: &mut Player, enemy: &mut Enemy) {
 
         // Read the player's turn command.
         let command = read_input("command: attack => a / heal => e / run => r / quit q");
-        println!("###########Player Health: {}", player.health_amount);
 
         // Apply the selected player action.
-        if player_action_ends_battle(&command, player, enemy) {
-            break;
+        match player_action(&command, player, enemy) {
+            TurnReslut::SkipEnemyTurn => continue,
+            TurnReslut::EndBattle => break,
+            TurnReslut::Continue => {}
         }
 
         // Reward the player when the enemy is defeated.
@@ -39,24 +40,24 @@ fn print_enemy_status(enemy: &Enemy) {
     );
 }
 
-fn player_action_ends_battle(command: &str, player: &mut Player, enemy: &mut Enemy) -> bool {
+fn player_action(command: &str, player: &mut Player, enemy: &mut Enemy) -> TurnReslut {
     match command {
         "a" => {
             player_attack(player, enemy);
-            false
+            TurnReslut::Continue
         }
         "e" => {
             heal_player(player);
-            false
+            TurnReslut::Continue
         }
         "r" => {
             println!("you run away");
-            true
+            TurnReslut::EndBattle
         }
-        "q" => true,
+        "q" => TurnReslut::EndBattle,
         _ => {
             println!("Unknown command: {}", command);
-            false
+            TurnReslut::SkipEnemyTurn
         }
     }
 }
@@ -75,7 +76,7 @@ fn heal_player(player: &mut Player) {
         player.health = player.max_health;
     }
 
-    println!("Healed 25 health: {}", player.health);
+    println!("Healed {} health: {}", heal_amount, player.health);
 }
 
 fn enemy_is_defeated(enemy: &Enemy) -> bool {
@@ -84,13 +85,11 @@ fn enemy_is_defeated(enemy: &Enemy) -> bool {
 
 fn reward_player(player: &mut Player, enemy: &Enemy) {
     player.gold += enemy.gold_reward;
-
-    let xp_gain = enemy.level * 20;
-    player.xp += xp_gain;
+    player.xp += enemy.xp_reward;
 
     println!("You defeated {}", enemy.name);
     println!("Gold gained: {}", enemy.gold_reward);
-    println!("XP gained: {}", xp_gain);
+    println!("XP gained: {}", enemy.xp_reward);
 
     check_level_up(player);
 }

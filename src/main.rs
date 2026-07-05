@@ -25,7 +25,7 @@ fn create_player() -> Player {
         gold: 0,
         level: 1,
         xp: 0,
-        xp_to_next_level: 10,
+        xp_to_next_level: 35,
     }
 }
 

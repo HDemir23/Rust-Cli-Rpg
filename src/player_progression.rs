@@ -13,8 +13,7 @@ pub fn check_level_up(player: &mut Player) {
         player.max_health += 20;
         player.health = player.max_health;
         player.damage += 5;
-        player.xp_to_next_level += player.level * 50;
-        player.health_amount += player_health_increase(&player);
+        player.xp_to_next_level += player.level * 45;
 
         println!("LEVEL UP!");
         println!("You are now level {}", player.level);
