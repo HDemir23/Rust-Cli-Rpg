@@ -5,10 +5,9 @@ mod read_input;
 pub mod structs;
 pub mod dungeon;
 
-use crate::enemy_gen::gen_enemy;
-use battle::battle;
+use crate::dungeon::run_dungeon;
 use read_input::read_input;
-use structs::{Enemy, Player};
+use structs::Player;
 
 fn main() {
     let mut player = create_player();
@@ -31,34 +30,28 @@ fn create_player() -> Player {
 }
 
 fn run_game_loop(player: &mut Player) {
+    let mut dungeon_level = 1;
+
     loop {
-        let mut enemy = gen_enemy(player);
+        let survived = run_dungeon(player, dungeon_level);
 
-        print_enemy_intro(&enemy);
-        battle(player, &mut enemy);
-
-        if player_is_dead(player) {
+        if !survived {
             print_game_over(player);
             break;
         }
+        dungeon_level += 1;
 
         if !should_continue_playing() {
+            println!("Exiting Dungeon");
             break;
         }
     }
 }
 
-fn print_enemy_intro(enemy: &Enemy) {
-    println!("\nA wild {} appeared!", enemy.name);
-    println!("Level: {}", enemy.level);
-    println!("Rarity: {:?}", enemy.rarity);
-    println!("Health: {}", enemy.health);
-    println!("Damage: {}", enemy.damage);
-}
 
-fn player_is_dead(player: &Player) -> bool {
-    player.health <= 0
-}
+// fn player_is_dead(player: &Player) -> bool {
+//     player.health <= 0
+// }
 
 fn print_game_over(player: &Player) {
     println!("Game Over");

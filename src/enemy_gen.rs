@@ -2,8 +2,9 @@ use crate::structs::{Enemy, EnemyArchetype, EnemyRarity, Player};
 use rand::seq::IndexedRandom;
 use rand::RngExt;
 
+
 /// Creates an enemy scaled around the current player level.
-pub fn gen_enemy(player: &Player) -> Enemy {
+pub fn gen_enemy(player: &Player, dungeon_level: u32, is_boss_room: bool) -> Enemy {
     let mut rng = rand::rng();
 
     let archetypes = [
@@ -41,10 +42,20 @@ pub fn gen_enemy(player: &Player) -> Enemy {
         .choose(&mut rng)
         .expect("Enemy arcetypes is empty");
 
-    let enemy_level = gen_enemy_level(player.level);
-    let rarity = gen_rarity();
+    let base_level = player.level.max(dungeon_level); // i am dumb af
+    let enemy_level = gen_enemy_level(base_level);
+
+
+    let rarity = if is_boss_room {
+        gen_rarity()
+    } else {
+        EnemyRarity::Boss
+    };
+
+
     let modifier = gen_modifiers();
 
+    let dungeon_multipilier = dungeon_level as i32;
     let level_multipilier = enemy_level as i32;
 
     let mut health = selected.base_health + level_multipilier * rng.random_range(5..=12);
@@ -54,6 +65,13 @@ pub fn gen_enemy(player: &Player) -> Enemy {
 
     rarity_bonus(&rarity, &mut health, &mut damage, &mut gold_reward, &mut xp_reward);
     apply_modifiers(&modifier, &mut health, &mut damage, &mut gold_reward, &mut xp_reward);
+
+
+    health += dungeon_multipilier * rng.random_range(8..=16);
+    damage += dungeon_multipilier * rng.random_range(1..=3);
+    gold_reward += dungeon_level * rng.random_range(5..=12);
+    xp_reward += dungeon_level * rng.random_range(8..=16);
+
 
     Enemy {
         name: format!("{} {}", modifier, selected.name),

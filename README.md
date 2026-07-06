@@ -215,3 +215,7 @@ prompt.
 ## License
 
 This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+
+random events
+crit damage and crit chance
+vibe it animation with ratatui

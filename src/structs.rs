@@ -46,3 +46,33 @@ pub enum TurnReslut {
     SkipEnemyTurn,
     EndBattle,
 }
+
+
+pub struct Dungeon {
+    pub level: u32,
+    pub current_room: u32,
+    pub max_room: u32,
+}
+
+
+impl Dungeon {
+    pub fn new(level: u32) -> Self {
+        Self {
+            level,
+            current_room: 1,
+            max_room: 3 + level,
+        }
+    }
+
+    pub fn is_boss_room(&self) -> bool {
+        self.current_room == self.current_room
+    }
+
+    pub fn is_cleared(&self) -> bool {
+        self.current_room > self.max_room
+    }
+
+    pub fn advance_room(&mut self) {
+        self.current_room += 1;
+    }
+}
