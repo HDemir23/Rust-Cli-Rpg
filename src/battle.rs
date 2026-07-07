@@ -1,9 +1,9 @@
 use crate::player_progression::{check_level_up, player_health_increase};
 use crate::read_input::read_input;
-use crate::structs::{Enemy, Player, TurnReslut};
+use crate::structs::{BattleOutcome, Enemy, Player, TurnReslut};
 
 /// Runs one battle encounter between the player and the active enemy.
-pub fn battle(player: &mut Player, enemy: &mut Enemy) {
+pub fn battle(player: &mut Player, enemy: &mut Enemy) -> BattleOutcome {
     // Continue until the player, enemy, or command flow ends the encounter.
     loop {
         print_enemy_status(enemy);
@@ -14,24 +14,26 @@ pub fn battle(player: &mut Player, enemy: &mut Enemy) {
         // Apply the selected player action.
         match player_action(&command, player, enemy) {
             TurnReslut::SkipEnemyTurn => continue,
-            TurnReslut::EndBattle => break,
+            TurnReslut::EndBattle(outcome) => return outcome,
             TurnReslut::Continue => {}
         }
+
 
         // Reward the player when the enemy is defeated.
         if enemy_is_defeated(enemy) {
             reward_player(player, enemy);
-            break;
+            return BattleOutcome::Victory;
         }
 
         enemy_attack(player, enemy);
 
         // End the encounter when the player is defeated.
         if player_is_defeated(player) {
-            break;
+            return BattleOutcome::Defeat;
         }
     }
 }
+
 
 fn print_enemy_status(enemy: &Enemy) {
     println!(
@@ -50,11 +52,8 @@ fn player_action(command: &str, player: &mut Player, enemy: &mut Enemy) -> TurnR
             heal_player(player);
             TurnReslut::Continue
         }
-        "r" => {
-            println!("you run away");
-            TurnReslut::EndBattle
-        }
-        "q" => TurnReslut::EndBattle,
+        "r" => { TurnReslut::EndBattle(BattleOutcome::Fleed) }
+        "q" => { TurnReslut::EndBattle(BattleOutcome::Quit) }
         _ => {
             println!("Unknown command: {}", command);
             TurnReslut::SkipEnemyTurn

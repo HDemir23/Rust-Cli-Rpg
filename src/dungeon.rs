@@ -1,30 +1,35 @@
 use crate::battle::battle;
 use crate::enemy_gen::gen_enemy;
 use crate::read_input::read_input;
-use crate::structs::{Dungeon, Enemy, Player};
+use crate::structs::{BattleOutcome, Dungeon, DungeonOutcome, Enemy, Player};
 
-pub fn run_dungeon(player: &mut Player, dungeon_level: u32) -> bool {
+pub fn run_dungeon(player: &mut Player, dungeon_level: u32) -> DungeonOutcome {
     let mut dungeon = Dungeon::new(dungeon_level);
+
 
     println!("Entering Dungeon level {}", dungeon.level);
 
     while !dungeon.is_cleared() {
         println!("Dungeon Level {} - Room {}", dungeon.level, dungeon.current_room);
-
         let mut enemy = gen_enemy(player, dungeon_level, dungeon.is_boss_room());
-
         print_enemy_intro(&enemy);
+        let res = battle(player, &mut enemy);
 
-        battle(player, &mut enemy);
 
-        if player.health <= 0 {
-            return false;
+        match res {
+            BattleOutcome::Victory => {
+                dungeon.advance_room()
+            }
+            BattleOutcome::Defeat => {
+                return DungeonOutcome::PlayerDied
+            }
+            BattleOutcome::Quit | BattleOutcome::Fleed => {
+                return DungeonOutcome::Left
+            }
         }
-        dungeon.advance_room();
     }
-
     reward_dungeon_clear(player, dungeon_level);
-    true
+    DungeonOutcome::Cleared
 }
 
 fn print_enemy_intro(enemy: &Enemy) {

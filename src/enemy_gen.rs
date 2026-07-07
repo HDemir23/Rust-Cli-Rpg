@@ -47,9 +47,9 @@ pub fn gen_enemy(player: &Player, dungeon_level: u32, is_boss_room: bool) -> Ene
 
 
     let rarity = if is_boss_room {
-        gen_rarity()
-    } else {
         EnemyRarity::Boss
+    } else {
+        gen_rarity()
     };
 
 

@@ -6,6 +6,7 @@ pub mod structs;
 pub mod dungeon;
 
 use crate::dungeon::run_dungeon;
+use crate::structs::DungeonOutcome;
 use read_input::read_input;
 use structs::Player;
 
@@ -21,7 +22,7 @@ fn create_player() -> Player {
         health: 100,
         health_amount: 25,
         max_health: 100,
-        damage: 20,
+        damage: 25,
         gold: 0,
         level: 1,
         xp: 0,
@@ -33,17 +34,25 @@ fn run_game_loop(player: &mut Player) {
     let mut dungeon_level = 1;
 
     loop {
-        let survived = run_dungeon(player, dungeon_level);
+        let dungeon_res = run_dungeon(player, dungeon_level);
 
-        if !survived {
-            print_game_over(player);
-            break;
-        }
-        dungeon_level += 1;
+        match dungeon_res {
+            DungeonOutcome::Cleared => {
+                dungeon_level += 1;
 
-        if !should_continue_playing() {
-            println!("Exiting Dungeon");
-            break;
+                if !should_continue_playing() {
+                    println!("Exiting Dungeon");
+                    break;
+                }
+            }
+            DungeonOutcome::PlayerDied => {
+                print_game_over(player);
+                break;
+            }
+            DungeonOutcome::Left => {
+                println!("Left dungeon");
+                break;
+            }
         }
     }
 }

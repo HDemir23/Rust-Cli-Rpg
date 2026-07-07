@@ -44,9 +44,20 @@ pub struct EnemyArchetype {
 pub enum TurnReslut {
     Continue,
     SkipEnemyTurn,
-    EndBattle,
+    EndBattle(BattleOutcome),
+}
+pub enum BattleOutcome {
+    Victory,
+    Defeat,
+    Fleed,
+    Quit,
 }
 
+pub enum DungeonOutcome {
+    Cleared,
+    PlayerDied,
+    Left,
+}
 
 pub struct Dungeon {
     pub level: u32,
@@ -65,7 +76,7 @@ impl Dungeon {
     }
 
     pub fn is_boss_room(&self) -> bool {
-        self.current_room == self.current_room
+        self.current_room == self.max_room
     }
 
     pub fn is_cleared(&self) -> bool {
