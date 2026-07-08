@@ -1,6 +1,6 @@
 use crate::player_progression::{check_level_up, player_health_increase};
 use crate::read_input::read_input;
-use crate::structs::{BattleOutcome, Enemy, Player, TurnReslut};
+use crate::structs::{BattleOutcome, Enemy, Player, PlayerAction, TurnReslut};
 
 /// Runs one battle encounter between the player and the active enemy.
 pub fn battle(player: &mut Player, enemy: &mut Enemy) -> BattleOutcome {
@@ -11,53 +11,46 @@ pub fn battle(player: &mut Player, enemy: &mut Enemy) -> BattleOutcome {
         // Read the player's turn command.
         let command = read_input("command: attack => a / heal => e / run => r / quit q");
 
-        // Apply the selected player action.
-        match player_action(&command, player, enemy) {
-            TurnReslut::SkipEnemyTurn => continue,
-            TurnReslut::EndBattle(outcome) => return outcome,
-            TurnReslut::Continue => {}
-        }
+        let Some(action) = command_to_action(&command) else {
+            println!("Unknown command");
+            continue;
+        };
 
-
-        // Reward the player when the enemy is defeated.
-        if enemy_is_defeated(enemy) {
-            reward_player(player, enemy);
-            return BattleOutcome::Victory;
-        }
-
-        enemy_attack(player, enemy);
-
-        // End the encounter when the player is defeated.
-        if player_is_defeated(player) {
-            return BattleOutcome::Defeat;
+        if let Some(outcome) = battle_turn(player, enemy, action) {
+            return outcome;
         }
     }
 }
 
 
-fn print_enemy_status(enemy: &Enemy) {
+pub fn print_enemy_status(enemy: &Enemy) {
     println!(
         "Enemy: {} Health: {} , Damage: {}",
         enemy.name, enemy.health, enemy.damage
     );
 }
 
-fn player_action(command: &str, player: &mut Player, enemy: &mut Enemy) -> TurnReslut {
+fn command_to_action(command: &str) -> Option<PlayerAction> {
     match command {
-        "a" => {
+        "a" => Some(PlayerAction::Attack),
+        "e" => Some(PlayerAction::Heal),
+        "r" => Some(PlayerAction::Run),
+        "q" => Some(PlayerAction::Quit),
+        _ => None,
+    }
+}
+fn player_action(action: PlayerAction, player: &mut Player, enemy: &mut Enemy) -> TurnReslut {
+    match action {
+        PlayerAction::Attack => {
             player_attack(player, enemy);
             TurnReslut::Continue
         }
-        "e" => {
+        PlayerAction::Heal => {
             heal_player(player);
             TurnReslut::Continue
         }
-        "r" => { TurnReslut::EndBattle(BattleOutcome::Fleed) }
-        "q" => { TurnReslut::EndBattle(BattleOutcome::Quit) }
-        _ => {
-            println!("Unknown command: {}", command);
-            TurnReslut::SkipEnemyTurn
-        }
+        PlayerAction::Run => { TurnReslut::EndBattle(BattleOutcome::Fleed) }
+        PlayerAction::Quit => { TurnReslut::EndBattle(BattleOutcome::Quit) }
     }
 }
 
@@ -100,4 +93,27 @@ fn enemy_attack(player: &mut Player, enemy: &Enemy) {
 
 fn player_is_defeated(player: &Player) -> bool {
     player.health <= 0
+}
+
+pub fn battle_turn(player: &mut Player, enemy: &mut Enemy, action: PlayerAction) -> Option<BattleOutcome> {
+    // Apply the selected player action.
+    match player_action(action, player, enemy) {
+        TurnReslut::SkipEnemyTurn => return None,
+        TurnReslut::EndBattle(outcome) => return Some(outcome),
+        TurnReslut::Continue => {}
+    }
+    // Reward the player when the enemy is defeated.
+    if enemy_is_defeated(enemy) {
+        reward_player(player, enemy);
+        return Some(BattleOutcome::Victory);
+    }
+
+    enemy_attack(player, enemy);
+
+    // End the encounter when the player is defeated.
+    if player_is_defeated(player) {
+        return Some(BattleOutcome::Defeat);
+    }
+
+    None
 }

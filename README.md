@@ -219,3 +219,4 @@ This project is licensed under the MIT License. See [LICENSE](LICENSE) for detai
 random events
 crit damage and crit chance
 vibe it animation with ratatui
+

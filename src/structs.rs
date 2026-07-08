@@ -11,6 +11,13 @@ pub struct Player {
     pub xp_to_next_level: u32,
 }
 
+pub enum PlayerAction {
+    Attack,
+    Heal,
+    Run,
+    Quit,
+}
+
 /// Enemy rarity tier used for stat and reward scaling.
 #[derive(Debug)]
 pub enum EnemyRarity {
