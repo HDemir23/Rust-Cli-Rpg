@@ -9,7 +9,7 @@ pub fn draw(frame: &mut Frame, app: &App) {
     let chunks = Layout::default()
         .direction(Direction::Vertical)
         .constraints([
-            Constraint::Length(6),
+            Constraint::Length(3),
             Constraint::Min(8),
             Constraint::Length(8),
         ])
@@ -21,7 +21,7 @@ pub fn draw(frame: &mut Frame, app: &App) {
         .split(chunks[0]);
 
     let player_text = format!(
-        "Name: {}\nLevel:{}\nGold: {}\nXP: {}/{}",
+        "Name: {} - Level:{} - Gold: {} - XP: {}/{}",
         app.player.name,
         app.player.level,
         app.player.gold,
@@ -52,7 +52,7 @@ pub fn draw(frame: &mut Frame, app: &App) {
 
     let middle_chunks = Layout::default()
         .direction(Direction::Horizontal)
-        .constraints([Constraint::Percentage(65), Constraint::Percentage(35)])
+        .constraints([Constraint::Percentage(80), Constraint::Percentage(20)])
         .split(chunks[1]);
 
     let enemy_text = match &app.enemy {

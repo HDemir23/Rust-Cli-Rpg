@@ -48,26 +48,23 @@ pub struct EnemyArchetype {
     pub base_xp: u32,
 }
 
-pub enum TurnReslut {
+pub enum TurnResult {
     Continue,
-    SkipEnemyTurn,
     EndBattle(BattleOutcome),
+}
+
+pub struct BattleTurnResult {
+    pub outcome: Option<BattleOutcome>,
+    pub messages: Vec<String>,
 }
 pub enum BattleOutcome {
     Victory,
     Defeat,
-    Fleed,
+    Fled,
     Quit,
 }
 
-pub enum DungeonOutcome {
-    Cleared,
-    PlayerDied,
-    Left,
-}
-
 pub struct Dungeon {
-    pub level: u32,
     pub current_room: u32,
     pub max_room: u32,
 }
@@ -76,7 +73,6 @@ pub struct Dungeon {
 impl Dungeon {
     pub fn new(level: u32) -> Self {
         Self {
-            level,
             current_room: 1,
             max_room: 3 + level,
         }

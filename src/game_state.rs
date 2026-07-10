@@ -1,5 +1,6 @@
 use crate::battle::battle_turn;
 use crate::enemy_gen::gen_enemy;
+use crate::player_progression::check_level_up;
 use crate::structs::{BattleOutcome, Dungeon, Enemy, Player, PlayerAction};
 pub struct App {
     pub player: Player,
@@ -8,6 +9,7 @@ pub struct App {
     pub enemy: Option<Enemy>,
     pub message: Vec<String>,
     pub should_quit: bool,
+    pub dungeon_finished: bool,
 }
 
 impl App {
@@ -19,6 +21,7 @@ impl App {
             enemy: None,
             message: Vec::new(),
             should_quit: false,
+            dungeon_finished: false,
         }
     }
 
@@ -28,7 +31,10 @@ impl App {
         }
 
         if self.dungeon.is_cleared() {
-            self.message.push("Dungeon cleared".to_string());
+            if !self.dungeon_finished {
+                self.message.push("Dungeon cleared".to_string());
+                self.dungeon_finished = true;
+            }
             return;
         }
 
@@ -49,9 +55,11 @@ impl App {
             return;
         };
 
-        let outcome = battle_turn(&mut self.player, enemy, action);
+        let result = battle_turn(&mut self.player, enemy, action);
 
-        match outcome {
+        self.message.extend(result.messages);
+
+        match result.outcome {
             Some(BattleOutcome::Victory) => {
                 self.message.push("Battle outcome victory".to_string());
                 self.enemy = None;
@@ -70,7 +78,7 @@ impl App {
                 self.message.push("Battle outcome quit".to_string());
                 self.should_quit = true;
             }
-            Some(BattleOutcome::Fleed) => {
+            Some(BattleOutcome::Fled) => {
                 self.message.push("Battle outcome fled".to_string());
                 self.enemy = None;
             }
@@ -87,6 +95,6 @@ impl App {
 
         self.player.gold += gold_bonus;
         self.player.xp += xp_bonus;
+        self.message.extend(check_level_up(&mut self.player));
     }
 }
-
