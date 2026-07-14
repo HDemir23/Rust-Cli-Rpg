@@ -5,6 +5,7 @@ mod player_progression;
 mod read_input;
 mod structs;
 mod ui;
+mod save;
 
 use crate::game_state::App;
 use crate::read_input::read_input;
@@ -12,7 +13,12 @@ use crate::structs::{Player, PlayerAction};
 use crossterm::event::{self, Event, KeyCode, KeyEventKind};
 
 fn main() -> std::io::Result<()> {
-    run_tui_loop(create_player())
+    let player = match save::load_player() {
+        Some(player) => player,
+        None => create_player(),
+    };
+
+    run_tui_loop(player)
 }
 
 fn create_player() -> Player {

@@ -1,4 +1,7 @@
-/// Runtime state for the player across dungeon encounters.
+use serde::{Deserialize, Serialize};
+
+/// Runtime state f
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Player {
     pub name: String,
     pub health: i32,
@@ -63,12 +66,11 @@ pub enum BattleOutcome {
     Fled,
     Quit,
 }
-
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Dungeon {
     pub current_room: u32,
     pub max_room: u32,
 }
-
 
 impl Dungeon {
     pub fn new(level: u32) -> Self {

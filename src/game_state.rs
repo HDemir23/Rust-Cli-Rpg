@@ -24,7 +24,6 @@ impl App {
             dungeon_finished: false,
         }
     }
-
     pub fn spawn_next_enemy(&mut self) {
         if self.enemy.is_some() {
             return;
@@ -32,6 +31,9 @@ impl App {
 
         if self.dungeon.is_cleared() {
             if !self.dungeon_finished {
+                self.reward_dungeon_clear();
+                self.dungeon_level += 1;
+                self.dungeon = Dungeon::new(self.dungeon_level);
                 self.message.push("Dungeon cleared".to_string());
                 self.dungeon_finished = true;
             }
